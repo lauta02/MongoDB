@@ -1,54 +1,55 @@
 const express = require('express');
 const router = express.Router();
-const ProductManager = require('../managers/ProductManager');
+const Product = require('../models/Product');
 
-const productManager = new ProductManager('productos.json');
-
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
-    const products = productManager.getProducts(limit);
+    const products = await Product.find().limit(limit);
     res.json({ products });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.get('/:pid', (req, res) => {
-  const productId = parseInt(req.params.pid, 10);
+router.get('/:pid', async (req, res) => {
+  const productId = req.params.pid;
   try {
-    const product = productManager.getProductById(productId);
+    const product = await Product.findById(productId);
+    if (!product) throw new Error('Producto no encontrado');
     res.json({ product });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 });
 
-router.put('/:pid', (req, res) => {
-  const productId = parseInt(req.params.pid, 10);
+router.put('/:pid', async (req, res) => {
+  const productId = req.params.pid;
   const updatedFields = req.body;
   try {
-    productManager.updateProduct(productId, updatedFields);
+    const product = await Product.findByIdAndUpdate(productId, updatedFields, { new: true });
+    if (!product) throw new Error('Producto no encontrado');
     res.json({ message: 'Producto actualizado correctamente' });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 });
 
-router.delete('/:pid', (req, res) => {
-  const productId = parseInt(req.params.pid, 10);
+router.delete('/:pid', async (req, res) => {
+  const productId = req.params.pid;
   try {
-    productManager.deleteProduct(productId);
+    const product = await Product.findByIdAndDelete(productId);
+    if (!product) throw new Error('Producto no encontrado');
     res.json({ message: 'Producto eliminado correctamente' });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const newProduct = req.body;
   try {
-    const product = productManager.addProduct(newProduct);
+    const product = await Product.create(newProduct);
     res.json({ product, message: 'Producto agregado correctamente' });
   } catch (error) {
     res.status(400).json({ error: error.message });

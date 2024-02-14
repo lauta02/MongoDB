@@ -1,0 +1,36 @@
+{{> main}}
+
+<section>
+    <h1>Chat</h1>
+    
+    <div id="chat">
+        {{#each messages}}
+            <p><strong>{{this.user}}</strong>: {{this.message}}</p>
+        {{/each}}
+    </div>
+
+    <form id="messageForm">
+        <input type="text" id="userInput" placeholder="Nombre de usuario">
+        <input type="text" id="messageInput" placeholder="Mensaje">
+        <button type="submit">Enviar</button>
+    </form>
+</section>
+
+<script>
+    const socket = io();
+
+    document.getElementById('messageForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const user = document.getElementById('userInput').value;
+        const message = document.getElementById('messageInput').value;
+        socket.emit('chatMessage', { user, message });
+        document.getElementById('messageInput').value = '';
+    });
+
+    socket.on('chatMessage', (message) => {
+        const chatDiv = document.getElementById('chat');
+        const newMessage = document.createElement('p');
+        newMessage.innerHTML = `<strong>${message.user}</strong>: ${message.message}`;
+        chatDiv.appendChild(newMessage);
+    });
+</script>
