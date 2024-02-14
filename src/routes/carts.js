@@ -4,7 +4,7 @@ const Cart = require('../models/Cart');
 
 router.post('/', async (req, res) => {
   try {
-    const newCart = await Cart.create({}); // Crea un nuevo carrito vacío
+    const newCart = await Cart.create({}); 
     res.json({ message: 'Carrito creado correctamente', cart: newCart });
   } catch (error) {
     res.status(400).json({ error: error.message });
