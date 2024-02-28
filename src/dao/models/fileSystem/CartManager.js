@@ -1,11 +1,4 @@
-const mongoose = require('mongoose');
-
-const cartSchema = new mongoose.Schema({
-  id: String,
-  products: [{ product: String, quantity: Number }]
-});
-
-const Cart = mongoose.model('Cart', cartSchema);
+const Cart = require('../models/Carts');
 
 class CartManager {
   async addCart() {

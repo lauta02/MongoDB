@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const cartSchema = require('../dao/models/Cart');
 
 const cartSchema = new mongoose.Schema({
   products: [{

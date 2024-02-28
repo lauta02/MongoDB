@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario WebSocket</title>
+</head>
+<body>
+    <h1>Formulario WebSocket</h1>
+    <form id="productForm">
+        <label for="productName">Nombre del producto:</label><br>
+        <input type="text" id="productName" name="productName" required><br>
+        
+
+        <label for="productPrice">Precio del producto:</label><br>
+        <input type="number" id="productPrice" name="productPrice" min="0.01" step="0.01" required><br>
+        
+
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        document.getElementById('productForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const productName = document.getElementById('productName').value.trim();
+            const productPrice = parseFloat(document.getElementById('productPrice').value);
+            
+
+            if (productName && !isNaN(productPrice) && productPrice > 0) {
+                
+                const product = { name: productName, price: productPrice };
+                socket.emit('addProduct', product);
+                
+            } else {
+                alert('Por favor, introduce un nombre de producto válido y un precio mayor que cero.');
+                
+            }
+        });
+    </script>
+</body>
+</html>

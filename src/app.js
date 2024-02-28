@@ -3,13 +3,16 @@ const http = require('http');
 const socketIO = require('socket.io');
 const exphbs = require('express-handlebars');
 const path = require('path');
+const ChatManager = require('./ChatManager'); 
 const ProductManager = require('./ProductManager');
-const viewsRouter = require('./src/routes/views');
+const viewsRouter = require('./routes/views');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 const port = 3000;
+
+const chatManager = new ChatManager(); 
 
 const productManager = new ProductManager('productos.json');
 
@@ -47,14 +50,10 @@ app.use('/', viewsRouter);
 io.on('connection', (socket) => {
   console.log('Cliente conectado');
 
-  socket.on('addProduct', (product) => {
-    productManager.addProduct(product);
-    io.emit('updateProducts', productManager.getProducts());
-  });
 
-  socket.on('deleteProduct', (productId) => {
-    productManager.deleteProduct(productId);
-    io.emit('updateProducts', productManager.getProducts());
+  socket.on('chatMessage', (message) => {
+    chatManager.addMessage(message);
+    io.emit('chatMessage', message);
   });
 
   socket.on('disconnect', () => {

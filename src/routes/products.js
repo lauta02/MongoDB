@@ -1,12 +1,47 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+const Product = require('../dao/models/models/Products');
 
 router.get('/', async (req, res) => {
   try {
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
-    const products = await Product.find().limit(limit);
-    res.json({ products });
+    const { limit = 10, page = 1, sort, query } = req.query;
+    const skip = (page - 1) * limit;
+    let filter = {};
+
+    if (query) {
+      filter = { $or: [{ category: query }, { availability: query }] };
+    }
+
+    let sortOption = {};
+    if (sort) {
+      sortOption = { price: sort === 'asc' ? 1 : -1 };
+    }
+
+    const products = await Product.find(filter)
+      .limit(parseInt(limit))
+      .skip(skip)
+      .sort(sortOption);
+
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limit);
+    const hasPrevPage = page > 1;
+    const hasNextPage = page < totalPages;
+
+    const prevLink = hasPrevPage ? `/products?limit=${limit}&page=${page - 1}&sort=${sort}&query=${query}` : null;
+    const nextLink = hasNextPage ? `/products?limit=${limit}&page=${page + 1}&sort=${sort}&query=${query}` : null;
+
+    res.json({
+      status: 'success',
+      payload: products,
+      totalPages,
+      prevPage: hasPrevPage ? page - 1 : null,
+      nextPage: hasNextPage ? page + 1 : null,
+      page,
+      hasPrevPage,
+      hasNextPage,
+      prevLink,
+      nextLink
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
