@@ -5,7 +5,11 @@ const Product = require('../dao/models/models/Products');
 
 router.post('/', async (req, res) => {
   try {
+<<<<<<< HEAD
     const newCart = await Cart.create({ products: [] }); 
+=======
+    const newCart = await Cart.create({}); 
+>>>>>>> 2056ab4db68eeb36fab64ec18e7e6b15ac6c95d7
     res.json({ message: 'Carrito creado correctamente', cart: newCart });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -44,6 +48,7 @@ router.post('/:cid/product/:pid', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 router.delete('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
@@ -108,3 +113,6 @@ router.delete('/:cid', async (req, res) => {
 });
 
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> 2056ab4db68eeb36fab64ec18e7e6b15ac6c95d7
