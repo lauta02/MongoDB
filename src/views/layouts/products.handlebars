@@ -1,0 +1,21 @@
+{{> main}}
+
+<section>
+    <h1>Productos</h1>
+    
+    <ul>
+        {{#each products}}
+            <li>
+                <strong>{{this.title}}</strong>
+                <p>{{this.description}}</p>
+                <p>Precio: ${{this.price}}</p>
+                <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
+            </li>
+        {{/each}}
+    </ul>
+</section>
+
+<script>
+    function addToCart(productId) {
+    }
+</script>
