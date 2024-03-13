@@ -41,7 +41,6 @@ router.delete('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   try {
-    // Implementar la eliminación de un producto del carrito
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -51,7 +50,6 @@ router.put('/:cid', async (req, res) => {
   const cartId = req.params.cid;
   const { products } = req.body;
   try {
-    // Implementar la actualización de los productos del carrito
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -62,7 +60,6 @@ router.put('/:cid/products/:pid', async (req, res) => {
   const productId = req.params.pid;
   const { quantity } = req.body;
   try {
-    // Implementar la actualización de la cantidad de un producto en el carrito
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -71,7 +68,6 @@ router.put('/:cid/products/:pid', async (req, res) => {
 router.delete('/:cid', async (req, res) => {
   const cartId = req.params.cid;
   try {
-    // Implementar la eliminación de todos los productos del carrito
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
