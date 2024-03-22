@@ -8,9 +8,9 @@ const authRouter = require('./routes/auth');
 const CartManager = require('./dao/models/mongoDB/CartManager'); 
 const ProductManager = require('./dao/models/mongoDB/ProductManager'); 
 const viewsRouter = require('./routes/views');
-import { initPassport } from './config/passport.config';
-import passport from 'passport';
-import { router as sessionsRouter } from './routes/sessions';
+const { initPassport } = require('./config/passport.config');
+const passport = require('passport');
+const { router: sessionsRouter } = require('./routes/sessions');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,11 +33,12 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
-initPassport()
-app.use(passport.initialize())
-app.use(passport.session())
+initPassport(passport);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/auth', authRouter);
+app.use('/sessions', sessionsRouter);
 
 app.use('/products', productsRouter); 
 app.use('/cart', cartRouter); 
@@ -56,5 +57,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${3333}`);
+    console.log(`Servidor escuchando en http://localhost:${port}`);
 });

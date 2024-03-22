@@ -1,9 +1,16 @@
-import { Router } from 'express';
-import passport from 'passport';
-export const router=Router()
+const express = require('express');
+const router = express.Router();
+const passport = require('passport');
 
-router.get('/github', passport.authenticate("github", {}), (req,res)=>{})
-router.get('/callbackGithub', passport.authenticate("github", {}), (req,res)=>{})
+// Ruta para obtener el usuario actual
+router.get('/current', (req, res) => {
+    // Aquí puedes acceder al usuario actual a través de req.user si se ha autenticado correctamente
+    // Devuelve el usuario o un mensaje de error según corresponda
+    if (req.user) {
+        res.json({ user: req.user });
+    } else {
+        res.status(401).json({ error: 'Usuario no autenticado' });
+    }
+});
 
-    res.setHeader('Content-Type','application/json')
-    return res.status(200).json({playload:"ok"});
+module.exports = router;

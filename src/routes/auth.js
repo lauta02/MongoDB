@@ -1,5 +1,5 @@
 const express = require('express');
-const passport = require('../config/passport');
+const passport = require('passport'); 
 const UserManager = require('../dao/models/UserManager');
 
 const router = express.Router();
@@ -15,16 +15,21 @@ router.post('/login', passport.authenticate('local', {
     failureFlash: true
 }));
 
+
 router.get('/register', (req, res) => {
     res.render('register');
 });
 
 router.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { first_name, last_name, email, password } = req.body;
     try {
-        const hashedPassword = await hashPassword(password);
-        await userManager.createUser({ name, email, password: hashedPassword });
-        res.redirect('/login');
+        const newUser = await userManager.createUser({ first_name, last_name, email, password });
+        req.login(newUser, (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error al iniciar sesión' });
+            }
+            return res.redirect('/products');
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
