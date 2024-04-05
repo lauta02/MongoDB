@@ -11,19 +11,14 @@ export const initPassport = () => {
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
-                // Aquí puedes manejar la lógica de autenticación con GitHub
-                // Por ejemplo, buscar o crear un usuario en tu base de datos
                 let user = await User.findOne({ email: profile.emails[0].value });
                 if (!user) {
-                    // Si el usuario no existe, puedes crearlo
                     user = new User({
                         first_name: profile.displayName,
                         email: profile.emails[0].value,
-                        // Puedes establecer otros campos si es necesario
                     });
                     await user.save();
                 }
-                // Devuelve al usuario encontrado o creado
                 done(null, user);
             } catch (error) {
                 return done(error);
@@ -33,12 +28,12 @@ export const initPassport = () => {
 };
 
 passport.serializeUser((user, done) => {
-    done(null, user._id); // Puedes serializar el ID del usuario
+    done(null, user._id);
 });
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await User.findById(id); // Encuentra al usuario por su ID
+        const user = await User.findById(id); 
         done(null, user);
     } catch (error) {
         return done(error);
