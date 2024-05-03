@@ -1,24 +1,25 @@
-const express = require('express');
-const http = require('http');
-const socketIO = require('socket.io');
-const exphbs = require('express-handlebars');
-const path = require('path');
-const session = require('express-session');
-const authRouter = require('./routes/auth');
-const CartManager = require('./dao/models/mongoDB/CartManager'); 
-const ProductManager = require('./dao/models/mongoDB/ProductManager'); 
-const viewsRouter = require('./routes/views');
-const { initPassport } = require('./config/passport.config');
-const passport = require('passport');
-const { router: sessionsRouter } = require('./routes/sessions');
+import express from 'express';
+import http from 'http';
+import socketIO from 'socket.io';
+import exphbs from 'express-handlebars';
+import path from 'path';
+import session from 'express-session';
+import authRouter from './routes/auth';
+import CartManager from './dao/models/mongoDB/CartManager';
+import ProductManager from './dao/models/mongoDB/ProductManager';
+import viewsRouter from './routes/views';
+import { initPassport } from './config/passport.config';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import { authenticateUser } from './config/passport.config';
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 const port = 3000;
 
-const cartManager = new CartManager(); 
-const productManager = new ProductManager(); 
+const cartManager = new CartManager();
+const productManager = new ProductManager();
 
 app.engine('handlebars', exphbs());
 app.set('views', path.join(__dirname, 'views'));
@@ -38,10 +39,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', authRouter);
-app.use('/sessions', sessionsRouter);
 
-app.use('/products', productsRouter); 
-app.use('/cart', cartRouter); 
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        authenticateUser(email, password, (err, user) => {
+            if (err || !user) {
+                return res.status(401).json({ message: 'Usuario no autorizado' });
+            }
+            const accessToken = jwt.sign({ id: user.id, email: user.email }, 'clave', { expiresIn: '1m' });
+            res.json({ accessToken: accessToken });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+});
 
 app.use('/', viewsRouter);
 
