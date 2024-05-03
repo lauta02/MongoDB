@@ -1,4 +1,5 @@
 const Cart = require('../models/Carts');
+const Cart = require('../dao/models/Cart');
 
 class CartManager {
   async updateCart(cartId, products) {
@@ -52,6 +53,8 @@ class CartManager {
       throw error;
     }
   }
+
+54ddeae2fcd28345467c0fdbdd40256b62bd3858
 }
 
 module.exports = CartManager;
