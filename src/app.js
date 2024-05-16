@@ -8,18 +8,9 @@ import authRouter from './routes/auth';
 import CartManager from './dao/models/mongoDB/CartManager';
 import ProductManager from './dao/models/mongoDB/ProductManager';
 import viewsRouter from './routes/views';
-import { initPassport } from './config/passport.config';
+import { initPassport, authenticateUser } from './config/passport.config'; 
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { authenticateUser } from './config/passport.config';
-const express = require('express');
-const http = require('http');
-const socketIO = require('socket.io');
-const exphbs = require('express-handlebars');
-const path = require('path');
-const ChatManager = require('./ChatManager'); 
-const ProductManager = require('./ProductManager');
-const viewsRouter = require('./routes/views');
 
 const app = express();
 const server = http.createServer(app);
@@ -29,9 +20,6 @@ const port = 3000;
 const cartManager = new CartManager();
 const productManager = new ProductManager();
 const chatManager = new ChatManager(); 
-
-const productManager = new ProductManager('productos.json');
->>>>>>> 54ddeae2fcd28345467c0fdbdd40256b62bd3858
 
 app.engine('handlebars', exphbs());
 app.set('views', path.join(__dirname, 'views'));
@@ -67,9 +55,7 @@ app.post('/login', async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+});
 
 app.get('/products', async (req, res) => {
   try {
@@ -89,7 +75,6 @@ app.get('/products/:pid', async (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
->>>>>>> 54ddeae2fcd28345467c0fdbdd40256b62bd3858
 });
 
 app.use('/', viewsRouter);
@@ -98,6 +83,8 @@ io.on('connection', (socket) => {
     console.log('Cliente conectado');
 
     socket.on('chatMessage', (message) => {
+        chatManager.addMessage(message);
+        io.emit('chatMessage', message);
     });
 
     socket.on('disconnect', () => {
@@ -107,19 +94,4 @@ io.on('connection', (socket) => {
 
 server.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
-  console.log('Cliente conectado');
-
-
-  socket.on('chatMessage', (message) => {
-    chatManager.addMessage(message);
-    io.emit('chatMessage', message);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado');
-  });
-});
-
-server.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
 });
