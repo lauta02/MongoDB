@@ -1,14 +1,10 @@
 const bcrypt = require('bcrypt');
 
-const saltRounds = 10;
-
-async function hashPassword(password) {
-  try {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    return hashedPassword;
-  } catch (error) {
-    throw error;
-  }
+exports.createHash = (password) => {
+    const saltRounds = 10;
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(saltRounds));
 }
 
-module.exports = { hashPassword };
+exports.isValidPassword = (user, password) => {
+    return bcrypt.compareSync(password, user.password);
+}

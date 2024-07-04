@@ -1,0 +1,45 @@
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+    <form action="/api/users/registrar" method="POST" class="flex flex-col mt-5 w-full max-w-md">
+        <label for="first_name" class="mb-2 text-sm font-medium text-gray-900">Nombre: </label>
+        <input 
+            placeholder="Tu nombre..."
+            type="text"
+            id="first_name"
+            name="first_name"
+            class="w-full bg-gray-50 border border-gray-700 text-gray-900 text-sm rounded-lg focus:ring-gray-400 focus:border-gray-400 p-2.5 focus:outline-none">
+        
+        <label for="last_name" class="mb-2 text-sm font-medium text-gray-900">Apellido: </label>
+        <input 
+            placeholder="Tu apellido..."
+            type="text"
+            id="last_name"
+            name="last_name"
+            class="w-full bg-gray-50 border border-gray-700 text-gray-900 text-sm rounded-lg focus:ring-gray-400 focus:border-gray-400 p-2.5 focus:outline-none">
+        
+        <label for="date_of_birth" class="mb-2 text-sm font-medium text-gray-900">Fecha de nacimiento: </label>
+        <input 
+            type="date"
+            id="date_of_birth"
+            name="date_of_birth"
+            class="w-full bg-gray-50 border border-gray-700 text-gray-900 text-sm rounded-lg focus:ring-gray-400 focus:border-gray-400 p-2.5 focus:outline-none">
+        
+        <label for="email" class="mb-2 text-sm font-medium text-gray-900">Correo electrónico: </label>
+        <input 
+            placeholder="Tu correo electrónico..."
+            type="text"
+            id="email"
+            name="email"
+            class="w-full bg-gray-50 border border-gray-700 text-gray-900 text-sm rounded-lg focus:ring-gray-400 focus:border-gray-400 p-2.5 focus:outline-none">
+        
+        <label for="password" class="mb-2 text-sm font-medium text-gray-900">Contraseña: </label>
+        <input 
+            placeholder="Tu contraseña..."
+            type="password"
+            id="password"
+            name="password"
+            class="w-full bg-gray-50 border border-gray-700 text-gray-900 text-sm rounded-lg focus:ring-gray-400 focus:border-gray-400 p-2.5 focus:outline-none">
+        
+        <input type="submit" value="Registrar" class="mt-3 bg-gray-700 hover:bg-gray-500 text-white font-medium uppercase py-2 px-4 rounded cursor-pointer">
+    </form>
+    <a class="mt-2 text-blue-700 font-medium cursor-pointer" href="/login">Si ya tienes una cuenta, inicia sesión</a>
+</div>

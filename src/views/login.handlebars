@@ -1,0 +1,25 @@
+<div class="min-h-screen w-full flex flex-col items-center justify-center bg-gray-200">
+    <form action="/api/users/login" method="POST" class="flex flex-col items-center bg-white p-6 shadow-lg rounded-lg">
+        <label for="email" class="mb-2 text-sm font-medium text-gray-800">Correo electrónico:</label>
+        <input 
+            placeholder="Tu correo electrónico..."
+            type="text"
+            id="email"
+            name="email"
+            class="w-64 bg-gray-100 border border-gray-400 text-gray-700 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 p-2.5 focus:outline-none">
+        <label for="password" class="mt-3 mb-2 text-sm font-medium text-gray-800">Contraseña:</label>
+        <input 
+            placeholder="Tu contraseña..."
+            type="password"
+            id="password"
+            name="password"
+            class="w-64 bg-gray-100 border border-gray-400 text-gray-700 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 p-2.5 focus:outline-none">
+        <input type="submit" value="Iniciar sesión" class="mt-3 bg-blue-600 hover:bg-blue-500 text-white font-medium uppercase py-2 px-4 rounded cursor-pointer">
+
+        <a class="mt-3 text-gray-800 font-medium cursor-pointer" href="/api/users/github">Iniciar sesión con Github</a>
+    </form>
+    <div class="flex flex-col items-center mt-4">
+        <a class="mt-2 text-blue-600 font-medium cursor-pointer" href="/register">Si no tienes una cuenta, crea una aquí</a>
+        <a class="mt-2 text-blue-600 font-medium cursor-pointer" href="/recoverpassword">Si no recuerdas tu contraseña, recupérala aquí</a>
+    </div>
+</div>

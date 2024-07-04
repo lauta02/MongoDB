@@ -1,0 +1,68 @@
+<div class="container mx-auto px-4 py-8">
+    {{#if session}}
+    <div class="flex justify-between items-center mb-8">
+        <div class="text-left">
+            <p class="font-semibold text-xl text-gray-700">Bienvenido/a {{session.first_name}} {{session.last_name}}</p>
+            <p class="text-gray-600 text-sm">Fecha de nacimiento: {{session.date_of_birth}}, email: {{session.email}}, rol: {{session.role}}</p>
+        </div>
+        <a href="/api/users/logout" class="bg-gray-700 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded cursor-pointer">Cerrar sesión</a>
+    </div>
+    {{/if}}
+    <h1 class="font-semibold text-4xl text-gray-700 text-center uppercase mb-8">Productos</h1>
+    <ul>
+        {{#if payload}}
+            {{#each payload}}
+                <li class="flex justify-between items-center py-8 border-b border-gray-300">
+                    <div class="w-1/2 mr-8">
+                        <p class="font-semibold text-lg">{{title}}</p>
+                        <p class="font-bold text-xl text-green-600">$ {{price}}</p>
+                        <p class="max-w-lg my-2">{{description}}</p>
+                        <p>ID: {{_id}}</p>
+                        <p>Código: {{code}}</p>
+                        <p>Estado: {{status}}</p>
+                        <p>Stock: {{stock}}</p>
+                        <p>Categoría: {{category}}</p>
+                        <p>Nº de miniaturas: {{thumbnails.length}}</p>
+                        <form action="/api/carts/{{../session.cart}}/products/{{_id}}" method="post">
+                            <button type="submit" id={{_id}} class="mt-4 bg-green-600 hover:bg-green-500 text-white font-medium py-2 px-4 rounded cursor-pointer">Agregar al carrito</button>
+                        </form>
+                    </div>
+                    <div class="w-1/2 flex justify-end gap-4">
+                        {{#each thumbnails}}
+                            <img class="h-32" src={{this}} alt="Imagen del producto">
+                        {{/each}}
+                    </div>
+                </li>
+            {{/each}}
+            <div class="flex justify-between items-center mt-8">
+                <div>
+                    {{#if hasPrevPage}}
+                        <a href={{prevLink}} class="bg-gray-700 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded cursor-pointer">Anterior</a>
+                    {{/if}}
+                </div>
+                <div>
+                    {{#if page}}
+                        <p>{{page}}</p>
+                    {{/if}}
+                </div>
+                <div>
+                    {{#if hasNextPage}}
+                        <a href={{nextLink}} class="bg-gray-700 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded cursor-pointer">Siguiente</a>
+                    {{/if}}
+                </div>
+            </div>
+        {{else}}
+            <div class="flex flex-col items-center my-8">
+                <hr class="w-20 border-t-2 border-gray-500">
+                {{#if message}}
+                    <h3 class="mt-4 text-center text-3xl font-bold text-red-500">ERROR: {{message}}</h3>
+                    <a href="/products" class="mt-4 bg-gray-700 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded cursor-pointer">Volver</a>
+                {{else}}
+                    <h3 class="mt-4 text-center text-3xl font-bold">No hay productos con los filtros aplicados</h3>
+                {{/if}}
+            </div>
+        {{/if}}
+    </ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.all.min.js"></script>
+<script src="/static/js/products.js"></script>

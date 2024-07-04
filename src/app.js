@@ -1,97 +1,57 @@
-import express from 'express';
-import http from 'http';
-import socketIO from 'socket.io';
-import exphbs from 'express-handlebars';
-import path from 'path';
-import session from 'express-session';
-import authRouter from './routes/auth';
-import CartManager from './dao/models/mongoDB/CartManager';
-import ProductManager from './dao/models/mongoDB/ProductManager';
-import viewsRouter from './routes/views';
-import { initPassport, authenticateUser } from './config/passport.config'; 
-import passport from 'passport';
-import jwt from 'jsonwebtoken';
+const express = require('express');
+const objectConfig = require('./config/objectConfig');
+const { addLogger, logger } = require('./config/logger');
+const cors = require('cors');
+
+const { Server } = require('socket.io');
+const socketProduct = require('./utils/socketProducts');
+const socketChat = require('./utils/socketChat');
+
+const mainRouter = require('./routes/index');
+
+const handlebars = require('express-handlebars');
+
+const passport = require('passport');
+const { initPassport, initPassportGithub } = require('./config/passport.config.js');
+const cookieParser = require('cookie-parser');
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIO(server);
-const port = 3000;
+app.use(addLogger);
 
-const cartManager = new CartManager();
-const productManager = new ProductManager();
-const chatManager = new ChatManager(); 
+const PORT = process.env.PORT || 3000; 
+const httpServer = app.listen(PORT, () => {
+    logger.info('Servidor en ejecución en el puerto: ' + PORT);
+});
 
-app.engine('handlebars', exphbs());
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'handlebars');
-
-app.use(express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(session({
-    secret: 'supersecreto',
-    resave: false,
-    saveUninitialized: true
-}));
-initPassport(passport);
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use('/auth', authRouter);
-
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        authenticateUser(email, password, (err, user) => {
-            if (err || !user) {
-                return res.status(401).json({ message: 'Usuario no autorizado' });
-            }
-            const accessToken = jwt.sign({ id: user.id, email: user.email }, 'clave', { expiresIn: '1m' });
-            res.json({ accessToken: accessToken });
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+const hbs = handlebars.create({
+    extname: '.handlebars', 
+    defaultLayout: 'main', 
+    layoutsDir: __dirname + '/views/layouts', 
+    partialsDir: __dirname + '/views/partials', 
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true
     }
 });
 
-app.get('/products', async (req, res) => {
-  try {
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
-    const products = await productManager.getProducts(limit);
-    res.json({ products });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+app.engine('handlebars', hbs.engine);
+app.set('view engine', 'handlebars');
+app.set('views', __dirname + '/views');
 
-app.get('/products/:pid', async (req, res) => {
-  const productId = parseInt(req.params.pid, 10);
-  try {
-    const product = await productManager.getProductById(productId);
-    res.json({ product });
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/static', express.static(__dirname + '/public'));
+app.use(cookieParser());
+app.use(cors({
+    origin: ['http://localhost:3333'],
+    credentials: true
+}));
 
-app.use('/', viewsRouter);
+initPassport();
+initPassportGithub();
+app.use(passport.initialize());
 
-io.on('connection', (socket) => {
-    console.log('Cliente conectado');
+app.use(mainRouter);
 
-    socket.on('chatMessage', (message) => {
-        chatManager.addMessage(message);
-        io.emit('chatMessage', message);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado');
-    });
-});
-
-server.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+const io = new Server(httpServer);
+socketProduct(io);
+socketChat(io);

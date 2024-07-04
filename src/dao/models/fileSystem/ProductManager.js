@@ -1,88 +1,105 @@
-const Product = require('../models/Products');
+const fs = require('fs').promises;
 
-const productSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  price: Number,
-  thumbnail: String,
-  code: String,
-  stock: Number
-});
+class ProductManagerFile {
+  constructor() {
+    this.filename = './src/dao/filesystem/data/products.json';
+    this.initializeFile();
+  }
 
-const Product = mongoose.model('Product', productSchema);
+  async initializeFile() {
+    try {
+      await fs.access(this.filename);
+    } catch (error) {
+      await fs.writeFile(this.filename, '[]');
+    }
+  }
 
-class ProductManager {
+  async getProducts() {
+    try {
+      const data = await fs.readFile(this.filename, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      throw new Error('Failed to fetch products:', error);
+    }
+  }
+
+  async getProductById(pid) {
+    try {
+      const products = await this.getProducts();
+      return products.find(product => product.id === pid);
+    } catch (error) {
+      throw new Error('Failed to fetch product by ID:', error);
+    }
+  }
+
   async addProduct(product) {
     try {
-      this.validateProduct(product);
+      const products = await this.getProducts();
 
-      if (await Product.findOne({ code: product.code })) {
-        throw new Error("Ya existe un producto con el mismo código.");
+      if (products.some(p => p.code === product.code)) {
+        throw new Error('Duplicate product code');
       }
 
-      const newProduct = new Product(product);
-      await newProduct.save();
-      console.log(`Producto añadido: ${newProduct.title}`);
-      return newProduct;
+      products.push({
+        id: products.length + 1,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        thumbnail: product.thumbnail,
+        code: product.code,
+        stock: product.stock
+      });
+
+      await this.saveProducts(products);
+      return products[products.length - 1]; 
     } catch (error) {
-      console.error("Error al agregar el producto:", error.message);
-      throw error;
+      throw new Error('Error adding product:', error);
     }
   }
 
-  async getProducts(limit) {
+  async updateProduct(pid, updatedProduct) {
     try {
-      const products = await Product.find().limit(limit);
-      return products;
-    } catch (error) {
-      console.error("Error al obtener los productos:", error.message);
-      throw error;
-    }
-  }
+      const products = await this.getProducts();
+      const productIndex = products.findIndex(product => product.id === pid);
 
-  async getProductById(id) {
-    try {
-      const product = await Product.findById(id);
-      if (product) {
-        return product;
-      } else {
-        throw new Error("Producto no encontrado.");
+      if (productIndex === -1) {
+        throw new Error(`Product with ID ${pid} not found`);
       }
-    } catch (error) {
-      console.error("Error al obtener el producto:", error.message);
-      throw error;
-    }
-  }
 
-  async updateProduct(id, updatedFields) {
-    try {
-      await Product.findByIdAndUpdate(id, updatedFields);
-      console.log(`Producto actualizado con ID ${id}`);
-    } catch (error) {
-      console.error("Error al actualizar el producto:", error.message);
-      throw error;
-    }
-  }
-
-  async deleteProduct(id) {
-    try {
-      await Product.findByIdAndDelete(id);
-      console.log(`Producto eliminado con ID ${id}`);
-    } catch (error) {
-      console.error("Error al eliminar el producto:", error.message);
-      throw error;
-    }
-  }
-
-  validateProduct(product) {
-    const requiredFields = ["title", "description", "price", "thumbnail", "code", "stock"];
-
-    for (const field of requiredFields) {
-      if (!product[field]) {
-        throw new Error(`El campo "${field}" es obligatorio.`);
+      const isDuplicate = products.some((p, index) => index !== productIndex && p.code === updatedProduct.code);
+      if (isDuplicate) {
+        throw new Error(`Product with code ${updatedProduct.code} already exists`);
       }
+
+      products[productIndex] = {
+        ...products[productIndex],
+        ...updatedProduct
+      };
+
+      await this.saveProducts(products);
+      return products[productIndex];
+    } catch (error) {
+      throw new Error('Error updating product:', error);
+    }
+  }
+
+  async deleteProduct(pid) {
+    try {
+      let products = await this.getProducts();
+      products = products.filter(product => product.id !== pid);
+      await this.saveProducts(products);
+    } catch (error) {
+      throw new Error('Error deleting product:', error);
+    }
+  }
+
+  async saveProducts(products) {
+    try {
+      await fs.writeFile(this.filename, JSON.stringify(products, null, 2), 'utf-8');
+    } catch (error) {
+      throw new Error('Failed to save products:', error);
     }
   }
 }
 
-module.exports = ProductManager;
+module.exports = ProductManagerFile;

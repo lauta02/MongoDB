@@ -1,0 +1,32 @@
+{{#if payload._id}}
+    <div class="container mx-auto">
+        <h1 class="text-4xl font-semibold text-gray-700 text-center uppercase my-5">Cart Products</h1>
+        <ul class="mt-4">
+            {{#each payload.products}}
+                <li class="flex justify-between items-start border-b border-gray-300 py-4">
+                    <div class="w-full lg:w-2/3">
+                        <h2 class="text-lg font-semibold">{{product.title}}</h2>
+                        <p class="text-gray-600 mt-1">${{product.price}}</p>
+                        <p class="text-sm text-gray-700 mt-2">{{product.description}}</p>
+                        <p class="text-sm text-gray-700">Quantity: {{quantity}}</p>
+                        <p class="text-sm text-gray-700">Product ID: {{product._id}}</p>
+                        <p class="text-sm text-gray-700">Code: {{product.code}}</p>
+                        <p class="text-sm text-gray-700">Status: {{product.status}}</p>
+                        <p class="text-sm text-gray-700">Stock: {{product.stock}}</p>
+                        <p class="text-sm text-gray-700">Category: {{product.category}}</p>
+                        <p class="text-sm text-gray-700">Number of Thumbnails: {{product.thumbnails.length}}</p>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-end w-full lg:w-1/3 mt-4 lg:mt-0 lg:pl-4">
+                        {{#each product.thumbnails}}
+                            <img class="h-24 lg:h-32 w-auto mr-2 mb-2" src={{this}} alt="Product Thumbnail">
+                        {{/each}}
+                    </div>
+                </li>
+            {{/each}}
+        </ul>
+    </div>
+{{else}}
+    <div class="container mx-auto">
+        <h1 class="text-4xl font-semibold text-gray-700 text-center uppercase my-5">The Cart Doesn't Exist</h1>
+    </div>
+{{/if}}

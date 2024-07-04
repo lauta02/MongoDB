@@ -1,85 +1,103 @@
-import passport from 'passport';
-import LocalStrategy from 'passport-local';
-import GitHubStrategy from 'passport-github2';
-import User from '../models/User';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import passport from 'passport';
+import { Strategy as GithubStrategy } from 'passport-github2';
+import { ExtractJwt, Strategy as JWTStrategy } from 'passport-jwt';
+import { Strategy as LocalStrategy } from 'passport-local';
+import User from '../models/User';
 
-passport.use('local-login', new LocalStrategy(
-    {
-        usernameField: 'email',
-        passwordField: 'password'
-    },
-    authenticateUser
-));
+export class PassportStrategies {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+    this.initializeStrategies();
+  }
 
-passport.use('github', new GitHubStrategy(
-    {
-        clientID: 'Iv1.da7d221d8710caaf',
-        clientSecret: 'd958b7e285b8774c2f63f3251833861b50860575',
-        callbackURL: 'http://localhost:3333/api/sessions/ProyectoBackend'
-    },
-    async (accessToken, refreshToken, profile, done) => {
-        try {
-            let user = await User.findOne({ email: profile.emails[0].value });
-            if (!user) {
-                user = new User({
-                    first_name: profile.displayName,
-                    email: profile.emails[0].value,
-                });
-                await user.save();
-            }
-            done(null, user);
-        } catch (error) {
-            return done(error);
-        }
-    }
-));
+  initializeStrategies = () => {
+    passport.use(
+      'local-login',
+      new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, this.localLoginStrategy)
+    );
 
-passport.serializeUser((user, done) => {
-    done(null, user._id);
-});
+    passport.use(
+      'github',
+      new GithubStrategy(
+        {
+          clientID: 'Iv1.da7d221d8710caaf',
+          clientSecret: 'd958b7e285b8774c2f63f3251833861b50860575',
+          callbackURL: 'http://localhost:3333/api/sessions/ProyectoBackend',
+        },
+        this.githubStrategy
+      )
+    );
 
-passport.deserializeUser(async (id, done) => {
-    try {
-        const user = await User.findById(id);
-        done(null, user);
-    } catch (error) {
-        return done(error);
-    }
-});
+    passport.use(
+      'jwt',
+      new JWTStrategy(
+        {
+          jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+          secretOrKey: 'clave',
+        },
+        this.jwtStrategy
+      )
+    );
 
-passport.use('current', new JwtStrategy({
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: 'clave'
-}, (payload, done) => {
-    User.findById(payload.id, (err, user) => {
-        if (err) {
-            return done(err, false);
-        }
-        if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false);
-        }
+    passport.serializeUser((user, done) => {
+      done(null, user._id);
     });
-}));
 
-export const authenticateUser = async (email, password, done) => {
+    passport.deserializeUser(async (id, done) => {
+      try {
+        const user = await this.userRepository.findById(id);
+        done(null, user);
+      } catch (error) {
+        done(error);
+      }
+    });
+  };
+
+  localLoginStrategy = async (email, password, done) => {
     try {
-        const user = await User.findOne({ email: email });
-        if (!user) {
-            return done(null, false, { message: 'Usuario no encontrado' });
-        }
+      const user = await this.userRepository.findOne({ email: email });
+      if (!user) {
+        return done(null, false, { message: 'Usuario no encontrado' });
+      }
 
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return done(null, false, { message: 'Contraseña incorrecta' });
-        }
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+        return done(null, false, { message: 'Contraseña incorrecta' });
+      }
 
-        return done(null, user);
+      return done(null, user);
     } catch (error) {
-        return done(error);
+      return done(error);
     }
-};
+  };
+
+  githubStrategy = async (accessToken, refreshToken, profile, done) => {
+    try {
+      let user = await this.userRepository.findOne({ email: profile.emails[0].value });
+      if (!user) {
+        user = new this.userRepository({
+          first_name: profile.displayName,
+          email: profile.emails[0].value,
+        });
+        await user.save();
+      }
+      done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  };
+
+  jwtStrategy = async (payload, done) => {
+    try {
+      const user = await this.userRepository.findById(payload.id);
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    } catch (error) {
+      return done(error, false);
+    }
+  };
+}
