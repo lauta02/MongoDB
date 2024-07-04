@@ -120,7 +120,7 @@ class ProductController {
 
             if (req.user.user.role === 'admin' && 'admin' !== product.owner) {
                 await transport.sendMail({
-                    from: 'Product deleted <agustingomezdev@gmail.com>',
+                    from: 'Product deleted <lauchaafernandez@gmail.com>',
                     to: product.owner,
                     subject: 'Product deleted',
                     html: `

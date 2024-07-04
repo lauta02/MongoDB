@@ -1,6 +1,5 @@
 const customSocket = io()
 
-// Receive products and display them
 customSocket.on('products', data =>{
     const productsContainer = document.querySelector('#products')
     let productsHTML = ''
@@ -27,7 +26,6 @@ customSocket.on('products', data =>{
     })
     productsContainer.innerHTML = productsHTML
 
-    // Delete products
     const deleteButtons = document.querySelectorAll('.deleteButton')
     deleteButtons.forEach(button => {
         button.addEventListener("click", event => {
@@ -37,7 +35,6 @@ customSocket.on('products', data =>{
     })
 })
 
-// Add products
 const productForm = document.querySelector('#form')
 productForm.addEventListener('submit', event => {
     event.preventDefault()

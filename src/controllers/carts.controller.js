@@ -124,7 +124,7 @@ class CartController {
                 ticketToSend = await ticketService.create(ticket);
 
                 await transport.sendMail({
-                    from: 'Ticket <agustingomezdev@gmail.com>',
+                    from: 'Ticket <lauchaafernandez@gmail.com>',
                     to: userEmail,
                     subject: 'Ticket',
                     html: `
